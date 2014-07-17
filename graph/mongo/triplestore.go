@@ -44,10 +44,7 @@ func CreateNewMongoGraph(addr string, options graph.Options) bool {
 		return false
 	}
 	conn.SetSafe(&mgo.Safe{})
-	dbName := DefaultDBName
-	if val, ok := options.StringKey("database_name"); ok {
-		dbName = val
-	}
+	dbName, _ := options.StringKey("database_name", DefaultDBName)
 	db := conn.DB(dbName)
 	indexOpts := mgo.Index{
 		Key:        []string{"Sub"},
@@ -73,10 +70,7 @@ func NewTripleStore(addr string, options graph.Options) *TripleStore {
 		glog.Fatal("Error connecting: ", err)
 	}
 	conn.SetSafe(&mgo.Safe{})
-	dbName := DefaultDBName
-	if val, ok := options.StringKey("database_name"); ok {
-		dbName = val
-	}
+	dbName, _ := options.StringKey("database_name", DefaultDBName)
 	ts.db = conn.DB(dbName)
 	ts.session = conn
 	ts.hasher = sha1.New()

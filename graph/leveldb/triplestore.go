@@ -68,19 +68,13 @@ func CreateNewLevelDB(path string) bool {
 func NewTripleStore(path string, options graph.Options) *TripleStore {
 	var ts TripleStore
 	ts.path = path
-	cache_size := DefaultCacheSize
-	if val, ok := options.IntKey("cache_size_mb"); ok {
-		cache_size = val
-	}
+	cache_size, _ := options.IntKey("cache_size_mb", DefaultCacheSize)
 	ts.dbOpts = &opt.Options{
 		BlockCache: cache.NewLRUCache(cache_size * opt.MiB),
 	}
 	ts.dbOpts.ErrorIfMissing = true
 
-	write_buffer_mb := DefaultWriteBufferSize
-	if val, ok := options.IntKey("write_buffer_mb"); ok {
-		write_buffer_mb = val
-	}
+	write_buffer_mb, _ := options.IntKey("write_buffer_mb", DefaultWriteBufferSize)
 	ts.dbOpts.WriteBuffer = write_buffer_mb * opt.MiB
 	ts.hasher = sha1.New()
 	ts.writeopts = &opt.WriteOptions{

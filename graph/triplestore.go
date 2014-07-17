@@ -94,7 +94,7 @@ type TripleStore interface {
 
 type Options map[string]interface{}
 
-func (d Options) IntKey(key string) (int, bool) {
+func (d Options) IntKey(key string, deflt int) (int, bool) {
 	if val, ok := d[key]; ok {
 		switch vv := val.(type) {
 		case float64:
@@ -103,10 +103,10 @@ func (d Options) IntKey(key string) (int, bool) {
 			glog.Fatalln("Invalid", key, "parameter type from config.")
 		}
 	}
-	return 0, false
+	return deflt, false
 }
 
-func (d Options) StringKey(key string) (string, bool) {
+func (d Options) StringKey(key, deflt string) (string, bool) {
 	if val, ok := d[key]; ok {
 		switch vv := val.(type) {
 		case string:
@@ -115,5 +115,5 @@ func (d Options) StringKey(key string) (string, bool) {
 			glog.Fatalln("Invalid", key, "parameter type from config.")
 		}
 	}
-	return "", false
+	return deflt, false
 }
