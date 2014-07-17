@@ -41,14 +41,14 @@ var port = flag.String("port", "64210", "Port to listen on.")
 var readOnly = flag.Bool("read_only", false, "Disable writing via HTTP.")
 var gremlinTimeout = flag.Int("gremlin_timeout", 30, "Number of seconds until an individual query times out.")
 
-func ParseConfigFromFile(filename string) *Config {
+func ParseConfigFromFile(filename string) (*Config, error) {
 	config := &Config{}
 	if filename == "" {
-		return config
+		return config, nil
 	}
 	f, err := os.Open(filename)
 	if err != nil {
-		glog.Fatalln("Couldn't open config file", filename)
+		return nil, err
 	}
 
 	defer f.Close()
@@ -56,33 +56,32 @@ func ParseConfigFromFile(filename string) *Config {
 	dec := json.NewDecoder(f)
 	err = dec.Decode(config)
 	if err != nil {
-		glog.Fatalln("Couldn't read config file:", err)
+		return nil, err
 	}
-	return config
+	return config, nil
 }
 
-func ParseConfigFromFlagsAndFile(fileFlag string) *Config {
+func ParseConfigFromFlagsAndFile(fileFlag string) (*Config, error) {
 	// Find the file...
 	var trueFilename string
 	if fileFlag != "" {
 		if _, err := os.Stat(fileFlag); os.IsNotExist(err) {
-			glog.Fatalln("Cannot find specified configuration file", fileFlag, ", aborting.")
-		} else {
-			trueFilename = fileFlag
+			//glog.Fatalln("Cannot find specified configuration file", fileFlag, ", aborting.")
+			return nil, err
 		}
-	} else {
-		if _, err := os.Stat(os.Getenv("CAYLEY_CFG")); err == nil {
-			trueFilename = os.Getenv("CAYLEY_CFG")
-		} else {
-			if _, err := os.Stat("/etc/cayley.cfg"); err == nil {
-				trueFilename = "/etc/cayley.cfg"
-			}
-		}
+		trueFilename = fileFlag
+	} else if _, err := os.Stat(os.Getenv("CAYLEY_CFG")); err == nil {
+		trueFilename = os.Getenv("CAYLEY_CFG")
+	} else if _, err := os.Stat("/etc/cayley.cfg"); err == nil {
+		trueFilename = "/etc/cayley.cfg"
 	}
 	if trueFilename == "" {
 		glog.Infoln("Couldn't find a config file in either $CAYLEY_CFG or /etc/cayley.cfg. Going by flag defaults only.")
 	}
-	config := ParseConfigFromFile(trueFilename)
+	config, err := ParseConfigFromFile(trueFilename)
+	if err != nil {
+		return nil, err
+	}
 
 	if config.DatabasePath == "" {
 		config.DatabasePath = *databasePath
@@ -110,5 +109,5 @@ func ParseConfigFromFlagsAndFile(fileFlag string) *Config {
 
 	config.ReadOnly = config.ReadOnly || *readOnly
 
-	return config
+	return config, nil
 }

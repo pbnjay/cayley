@@ -60,7 +60,11 @@ func main() {
 	os.Args = newargs
 	flag.Parse()
 	var ts graph.TripleStore
-	cfg := config.ParseConfigFromFlagsAndFile(*configFile)
+	cfg, err := config.ParseConfigFromFlagsAndFile(*configFile)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Config error: ", err)
+		os.Exit(1)
+	}
 	if os.Getenv("GOMAXPROCS") == "" {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 		glog.Infoln("Setting GOMAXPROCS to", runtime.NumCPU())
