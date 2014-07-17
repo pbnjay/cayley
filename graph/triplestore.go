@@ -22,6 +22,7 @@ package graph
 // triple backing store we prefer.
 
 import (
+	"fmt"
 	"github.com/barakmich/glog"
 )
 
@@ -100,7 +101,16 @@ func (d Options) IntKey(key string, deflt int) (int, bool) {
 		case float64:
 			return int(vv), true
 		default:
-			glog.Fatalln("Invalid", key, "parameter type from config.")
+			var v int
+			ss := fmt.Sprint(val)
+			if ss != "" {
+				_, err := fmt.Sscanf(ss, "%d", &v)
+				if err == nil {
+					return v, true
+				}
+				glog.Infof("Config param '%s' is not an integer (saw '%s'). Using default value %d.\n",
+					key, ss, deflt)
+			}
 		}
 	}
 	return deflt, false
@@ -112,7 +122,7 @@ func (d Options) StringKey(key, deflt string) (string, bool) {
 		case string:
 			return vv, true
 		default:
-			glog.Fatalln("Invalid", key, "parameter type from config.")
+			return fmt.Sprint(val), true
 		}
 	}
 	return deflt, false
