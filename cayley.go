@@ -31,6 +31,7 @@ import (
 	_ "github.com/google/cayley/graph/leveldb"
 	_ "github.com/google/cayley/graph/memstore"
 	_ "github.com/google/cayley/graph/mongo"
+	_ "github.com/google/cayley/graph/postgres"
 )
 
 var tripleFile = flag.String("triples", "", "Triple File to load before going to REPL.")
